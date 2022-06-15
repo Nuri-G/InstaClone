@@ -50,6 +50,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         TextView tvDescription;
         TextView tvUsername;
         TextView tvFeedTimestamp;
+        ImageView ivProfileCircle;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -57,6 +58,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             tvDescription = itemView.findViewById(R.id.tvDescription);
             tvUsername = itemView.findViewById(R.id.tvUsername);
             tvFeedTimestamp = itemView.findViewById(R.id.tvFeedTimestamp);
+            ivProfileCircle = itemView.findViewById(R.id.ivProfileCircle);
             itemView.setOnClickListener(this);
         }
 
@@ -69,6 +71,10 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
                 Glide.with(context)
                         .load(post.getImage().getFile())
                         .into(ivFeedPost);
+                Glide.with(context)
+                        .load(post.getUser().getParseFile("profilePicture").getUrl())
+                        .circleCrop()
+                        .into(ivProfileCircle);
             } catch (ParseException e) {
                 e.printStackTrace();
             }
