@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/ivFeedPost"
+        android:layout_width="match_parent"
+        android:layout_height="227dp"
+        android:layout_below="@+id/tvUsername"
+        android:layout_marginTop="5dp"
+        tools:srcCompat="@tools:sample/avatars" />
+
+    <TextView
+        android:id="@+id/tvUsername"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="13dp"
+        android:layout_marginTop="25dp"
+        android:textStyle="bold"
+        tools:text="Username" />
+
+    <TextView
+        android:id="@+id/tvDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ivFeedPost"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="65dp"
+        android:layout_marginTop="15dp"
+        tools:text="A short description of the post will go here." />
+
+    <TextView
+        android:id="@+id/tvFeedTimestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="25dp"
+        android:layout_toEndOf="@+id/tvUsername"
+        tools:text="an hour ago" />
+</RelativeLayout>
