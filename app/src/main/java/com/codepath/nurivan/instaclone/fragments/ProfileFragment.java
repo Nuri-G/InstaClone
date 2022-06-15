@@ -24,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.codepath.nurivan.instaclone.activities.LoginActivity;
 import com.codepath.nurivan.instaclone.R;
 import com.parse.ParseException;
@@ -113,6 +114,7 @@ public class ProfileFragment extends Fragment {
 
         Glide.with(view)
                 .load(ParseUser.getCurrentUser().getParseFile("profilePicture").getUrl())
+                .circleCrop()
                 .into(ivProfilePicture);
     }
 
