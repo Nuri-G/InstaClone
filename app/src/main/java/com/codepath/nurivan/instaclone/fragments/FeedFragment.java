@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.codepath.nurivan.instaclone.EndlessRecyclerViewScrollListener;
 import com.codepath.nurivan.instaclone.Post;
 import com.codepath.nurivan.instaclone.PostAdapter;
 import com.codepath.nurivan.instaclone.R;
@@ -30,6 +31,7 @@ public class FeedFragment extends Fragment {
     private SwipeRefreshLayout swipeContainer;
     private List<Post> postList;
     private PostAdapter adapter;
+    private EndlessRecyclerViewScrollListener scrollListener;
 
     // The onCreateView method is called when Fragment should create its View object hierarchy,
     // either dynamically or via XML layout inflation.
@@ -47,22 +49,37 @@ public class FeedFragment extends Fragment {
         postList = new ArrayList<>();
         adapter = new PostAdapter(getContext(), postList);
 
-        rvFeed.setLayoutManager(new LinearLayoutManager(getContext()));
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+
+        scrollListener = new EndlessRecyclerViewScrollListener(layoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                refreshFeed(page);
+            }
+        };
+
+        rvFeed.setLayoutManager(layoutManager);
         rvFeed.setAdapter(adapter);
+        rvFeed.addOnScrollListener(scrollListener);
         swipeContainer = view.findViewById(R.id.swipeContainer);
 
         swipeContainer.setOnRefreshListener(() -> {
-            refreshFeed();
+            refreshFeed(0);
             swipeContainer.setRefreshing(false);
         });
 
-        refreshFeed();
+        refreshFeed(0);
+
     }
-    private void refreshFeed() {
-        postList.clear();
+    private void refreshFeed(int page) {
+        int ITEMS_PER_PAGE = 10;
+        if(page == 0) {
+            postList.clear();
+        }
         ParseQuery<Post> query = ParseQuery.getQuery(Post.class);
         query.include(Post.KEY_USER);
-        query.setLimit(20);
+        query.setLimit(ITEMS_PER_PAGE);
+        query.setSkip(page * ITEMS_PER_PAGE);
         query.orderByDescending(Post.KEY_CREATED_AT);
         query.findInBackground(new FindCallback<Post>() {
             @Override
@@ -72,7 +89,7 @@ public class FeedFragment extends Fragment {
                     return;
                 }
                 postList.addAll(posts);
-                adapter.notifyDataSetChanged();
+                adapter.notifyItemRangeChanged(page * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE + ITEMS_PER_PAGE);
             }
         });
     }
