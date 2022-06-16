@@ -10,10 +10,11 @@
         android:id="@+id/bLogout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
         android:text="Log Out"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/bUpdatePicture" />
+        app:layout_constraintStart_toEndOf="@+id/bUpdatePicture"
+        app:layout_constraintTop_toBottomOf="@+id/ivProfilePicture" />
 
     <TextView
         android:id="@+id/tvProfileUsername"
@@ -44,6 +45,7 @@
         android:layout_marginTop="4dp"
         android:text="Update Picture"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.298"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/ivProfilePicture" />
 
@@ -59,4 +61,13 @@
         app:layout_constraintHorizontal_bias="0.375"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvPostList"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/bUpdatePicture" />
 </androidx.constraintlayout.widget.ConstraintLayout>

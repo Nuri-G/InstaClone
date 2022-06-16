@@ -1,5 +1,7 @@
 package com.codepath.nurivan.instaclone.fragments;
 
+import static com.parse.Parse.getApplicationContext;
+
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -22,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.codepath.nurivan.instaclone.Post;
@@ -34,41 +37,40 @@ import com.parse.SaveCallback;
 import java.io.File;
 
 public class PostFragment extends Fragment {
-    public static final String TAG = "MainActivity";
-    public static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 36;
-    public String photoFileName = "photo.jpg";
-    private File photoFile;
+    private static final String TAG = "PostFragment";
 
 
     Button bPicture;
     Button bSubmit;
     EditText etDescription;
     ImageView ivPost;
+    ProgressBar pbUploading;
 
-    private ActivityResultLauncher resultLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            new ActivityResultCallback<ActivityResult>() {
-                @Override
-                public void onActivityResult(ActivityResult result) {
-                    if (result.getResultCode() == getActivity().RESULT_OK) {
-                        // by this point we have the camera photo on disk
-                        Bitmap takenImage = BitmapFactory.decodeFile(photoFile.getAbsolutePath());
-                        // RESIZE BITMAP, see section below
-                        // Load the taken image into a preview
-                        ImageView ivPreview = (ImageView) getView().findViewById(R.id.ivPost);
-                        ivPreview.setImageBitmap(takenImage);
-
-                        bSubmit.setVisibility(View.VISIBLE);
-                    } else { // Result was a failure
-                        Toast.makeText(getActivity(), "Picture wasn't taken!", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
+    private File photoFile;
+    private Uri photoFileUri;
+    private ActivityResultLauncher<Uri> resultLauncher;
 
     // The onCreateView method is called when Fragment should create its View object hierarchy,
     // either dynamically or via XML layout inflation.
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
+        photoFile = getPhotoFileUri("photo.jpg");
+        photoFileUri = FileProvider.getUriForFile(getActivity(), "com.codepath.fileprovider", photoFile);
+
+        resultLauncher = registerForActivityResult(
+                new ActivityResultContracts.TakePicture(),
+                new ActivityResultCallback<Boolean>() {
+                    @Override
+                    public void onActivityResult(Boolean result) {
+                        Bitmap takenImage = BitmapFactory.decodeFile(photoFile.getAbsolutePath());
+                        // RESIZE BITMAP, see section below
+                        // Load the taken image into a preview
+                        ImageView ivPreview = (ImageView) getView().findViewById(R.id.ivPost);
+                        ivPreview.setImageBitmap(takenImage);
+                        bSubmit.setVisibility(View.VISIBLE);
+                    }
+                });
+
         // Defines the xml file for the fragment
         return inflater.inflate(R.layout.fragment_post, parent, false);
     }
@@ -81,6 +83,7 @@ public class PostFragment extends Fragment {
         bSubmit = view.findViewById(R.id.bSubmit);
         etDescription = view.findViewById(R.id.etDescription);
         ivPost = view.findViewById(R.id.ivPost);
+        pbUploading = view.findViewById(R.id.pbUploading);
 
         bSubmit.setOnClickListener(v -> {
             String description = etDescription.getText().toString();
@@ -93,6 +96,9 @@ public class PostFragment extends Fragment {
                 Toast.makeText(getActivity(), "There is no image!", Toast.LENGTH_SHORT).show();
                 return;
             }
+
+            bSubmit.setVisibility(View.GONE);
+            pbUploading.setVisibility(View.VISIBLE);
 
             ParseUser currentUser = ParseUser.getCurrentUser();
             savePost(description, currentUser, photoFile);
@@ -118,29 +124,13 @@ public class PostFragment extends Fragment {
                 Log.i(TAG, "Post saved successfully");
                 etDescription.setText("");
                 ivPost.setImageResource(0);
-                bSubmit.setVisibility(View.GONE);
+                pbUploading.setVisibility(View.GONE);
             }
         });
     }
 
     private void launchCamera() {
-        // create Intent to take a picture and return control to the calling application
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Create a File reference for future access
-        photoFile = getPhotoFileUri(photoFileName);
-
-        // wrap File object into a content provider
-        // required for API >= 24
-        // See https://guides.codepath.com/android/Sharing-Content-with-Intents#sharing-files-with-api-24-or-higher
-        Uri fileProvider = FileProvider.getUriForFile(getActivity(), "com.codepath.fileprovider", photoFile);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, fileProvider);
-
-        // If you call startActivityForResult() using an intent that no app can handle, your app will crash.
-        // So as long as the result is not null, it's safe to use the intent.
-        if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
-            // Start the image capture intent to take photo
-            resultLauncher.launch(intent);
-        }
+        resultLauncher.launch(photoFileUri);
     }
 
     // Returns the File for a photo stored on disk given the fileName

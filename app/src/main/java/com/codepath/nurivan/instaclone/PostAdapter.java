@@ -20,17 +20,25 @@ import java.util.List;
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     Context context;
     List<Post> posts;
+    boolean pictureOnly;
 
     public PostAdapter(Context context, List<Post> posts) {
         this.context = context;
         this.posts = posts;
+        this.pictureOnly = false;
+    }
+
+    public PostAdapter(Context context, List<Post> posts, boolean pictureOnly) {
+        this.context = context;
+        this.posts = posts;
+        this.pictureOnly = pictureOnly;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.item_post, parent, false);
-        return new ViewHolder(view);
+        return new ViewHolder(view, pictureOnly);
     }
 
     @Override
@@ -52,6 +60,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         TextView tvFeedTimestamp;
         ImageView ivProfileCircle;
 
+        boolean pictureOnly;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             ivFeedPost = itemView.findViewById(R.id.ivFeedPost);
@@ -59,22 +69,45 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             tvUsername = itemView.findViewById(R.id.tvUsername);
             tvFeedTimestamp = itemView.findViewById(R.id.tvFeedTimestamp);
             ivProfileCircle = itemView.findViewById(R.id.ivProfileCircle);
+            this.pictureOnly = false;
+            itemView.setOnClickListener(this);
+        }
+
+        public ViewHolder(@NonNull View itemView, boolean pictureOnly) {
+            super(itemView);
+            ivFeedPost = itemView.findViewById(R.id.ivFeedPost);
+            tvDescription = itemView.findViewById(R.id.tvDescription);
+            tvUsername = itemView.findViewById(R.id.tvUsername);
+            tvFeedTimestamp = itemView.findViewById(R.id.tvFeedTimestamp);
+            ivProfileCircle = itemView.findViewById(R.id.ivProfileCircle);
+            this.pictureOnly = pictureOnly;
             itemView.setOnClickListener(this);
         }
 
         public void bind(Post post) {
-            tvDescription.setText(post.getDescription());
-            tvUsername.setText(post.getUser().getUsername());
-            tvFeedTimestamp.setText(post.getTimeAgo());
+            if(!pictureOnly) {
+                tvDescription.setText(post.getDescription());
+                tvUsername.setText(post.getUser().getUsername());
+                tvFeedTimestamp.setText(post.getTimeAgo());
+
+            } else {
+                tvDescription.setVisibility(View.GONE);
+                tvUsername.setVisibility(View.GONE);
+                tvFeedTimestamp.setVisibility(View.GONE);
+                ivProfileCircle.setVisibility(View.GONE);
+            }
 
             try {
                 Glide.with(context)
                         .load(post.getImage().getFile())
                         .into(ivFeedPost);
-                Glide.with(context)
-                        .load(post.getUser().getParseFile("profilePicture").getUrl())
-                        .circleCrop()
-                        .into(ivProfileCircle);
+
+                if(!pictureOnly) {
+                    Glide.with(context)
+                            .load(post.getUser().getParseFile("profilePicture").getUrl())
+                            .circleCrop()
+                            .into(ivProfileCircle);
+                }
             } catch (ParseException e) {
                 e.printStackTrace();
             }
