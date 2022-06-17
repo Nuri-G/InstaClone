@@ -1,5 +1,6 @@
 package com.codepath.nurivan.instaclone.fragments;
 
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -7,10 +8,10 @@ import android.graphics.ImageDecoder;
 import android.net.Uri;
 import android.os.Bundle;
 
-import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -41,7 +42,9 @@ import com.parse.SaveCallback;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,25 +59,33 @@ public class ProfileFragment extends Fragment {
     private PostAdapter adapter;
     private List<Post> postList;
 
-    private ActivityResultLauncher resultLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            new ActivityResultCallback<ActivityResult>() {
-                @Override
-                public void onActivityResult(ActivityResult result) {
-                    if (result.getResultCode() == getActivity().RESULT_OK) {
-                        // compare the resultCode with the
-                        // SELECT_PICTURE constant
-                        // Get the url of the image from data
-                        Uri selectedImageUri = result.getData().getData();
-                        if (null != selectedImageUri) {
+    private ActivityResultLauncher<String> resultLauncher;
+
+
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
+
+        resultLauncher = registerForActivityResult(
+                new ActivityResultContracts.GetContent(),
+                new ActivityResultCallback<Uri>() {
+
+                    @Override
+                    public void onActivityResult(Uri result) {
+                        if (result != null) {
+                            // compare the resultCode with the
+                            // SELECT_PICTURE constant
+                            // Get the url of the image from data
                             // update the preview image in the layout
                             Glide.with(getContext())
-                                    .load(selectedImageUri)
+                                    .load(result)
+                                    .circleCrop()
                                     .into(ivProfilePicture);
+
 
                             Bitmap selectedImageBitmap;
                             try {
-                                ImageDecoder.Source source = ImageDecoder.createSource(getContext().getContentResolver(), selectedImageUri);
+                                ImageDecoder.Source source = ImageDecoder.createSource(getContext().getContentResolver(), result);
                                 selectedImageBitmap = ImageDecoder.decodeBitmap(source);
                             }
                             catch (IOException e) {
@@ -83,8 +94,9 @@ public class ProfileFragment extends Fragment {
                             }
 
                             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                            selectedImageBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+                            selectedImageBitmap.compress(Bitmap.CompressFormat.PNG, 20, outputStream);
                             byte[] image = outputStream.toByteArray();
+
 
                             ParseFile profileImage = new ParseFile("profilePicture.png", image);
 
@@ -92,21 +104,17 @@ public class ProfileFragment extends Fragment {
                             ParseUser.getCurrentUser().saveInBackground(e -> {
                                 if(e == null) {
                                     Log.i(TAG, "Updated profile.");
+                                    Toast.makeText(getActivity(), "Updated profile picture.", Toast.LENGTH_SHORT).show();
                                 } else {
                                     Log.e(TAG, "Failed to update profile.", e);
                                 }
                             });
+
+                        } else { // Result was a failure
+                            Toast.makeText(getActivity(), "Picture wasn't taken!", Toast.LENGTH_SHORT).show();
                         }
-
-                    } else { // Result was a failure
-                        Toast.makeText(getActivity(), "Picture wasn't taken!", Toast.LENGTH_SHORT).show();
                     }
-                }
-            });
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        // Defines the xml file for the fragment
+                });
         return inflater.inflate(R.layout.fragment_profile, parent, false);
     }
 
@@ -170,14 +178,8 @@ public class ProfileFragment extends Fragment {
 
     void imageChooser() {
 
-        // create an instance of the
-        // intent of the type image
-        Intent i = new Intent();
-        i.setType("image/*");
-        i.setAction(Intent.ACTION_GET_CONTENT);
-
         // pass the constant to compare it
         // with the returned requestCode
-        resultLauncher.launch(i);
+        resultLauncher.launch("image/*");
     }
 }

@@ -8,7 +8,6 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 
-import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -16,7 +15,6 @@ import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -56,7 +54,6 @@ public class PostFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         photoFile = getPhotoFileUri("photo.jpg");
         photoFileUri = FileProvider.getUriForFile(getActivity(), "com.codepath.fileprovider", photoFile);
-
         resultLauncher = registerForActivityResult(
                 new ActivityResultContracts.TakePicture(),
                 new ActivityResultCallback<Boolean>() {
