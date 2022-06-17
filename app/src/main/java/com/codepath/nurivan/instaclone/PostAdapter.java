@@ -125,11 +125,14 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
                 context.startActivity(intent);
             });
 
-            tvUsername.setOnClickListener(e -> {
+            View.OnClickListener listener = e -> {
                 Intent intent = new Intent(context, UserProfileActivity.class);
                 intent.putExtra(Post.class.getSimpleName(), post);
                 context.startActivity(intent);
-            });
+            };
+
+            tvUsername.setOnClickListener(listener);
+            ivProfileCircle.setOnClickListener(listener);
 
             JSONArray likedUsers = post.getLikedUsers();
 
