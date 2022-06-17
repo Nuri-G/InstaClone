@@ -2,6 +2,7 @@ package com.codepath.nurivan.instaclone;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,10 +13,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.codepath.nurivan.instaclone.activities.LoginActivity;
 import com.codepath.nurivan.instaclone.activities.PostDetailsActivity;
+import com.codepath.nurivan.instaclone.activities.UserProfileActivity;
 import com.parse.ParseException;
 import com.parse.ParseUser;
 
@@ -106,6 +110,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
                 ivProfileCircle.setVisibility(View.GONE);
                 ibLike.setVisibility(View.GONE);
                 tvLikeLabel.setVisibility(View.GONE);
+                tvLikes.setVisibility(View.GONE);
 
             }
 
@@ -117,6 +122,12 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
                 // serialize the movie using parceler, use its short name as a key
                 intent.putExtra(Post.class.getSimpleName(), post);
                 // show the activity
+                context.startActivity(intent);
+            });
+
+            tvUsername.setOnClickListener(e -> {
+                Intent intent = new Intent(context, UserProfileActivity.class);
+                intent.putExtra(Post.class.getSimpleName(), post);
                 context.startActivity(intent);
             });
 

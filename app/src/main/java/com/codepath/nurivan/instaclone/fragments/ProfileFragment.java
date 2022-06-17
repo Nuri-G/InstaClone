@@ -11,6 +11,7 @@ import android.os.Bundle;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -55,6 +56,12 @@ public class ProfileFragment extends Fragment {
     private Button bUpdatePicture;
     private TextView tvProfileUsername;
     private ImageView ivProfilePicture;
+
+    @Override
+    public boolean shouldShowRequestPermissionRationale(@NonNull String permission) {
+        return super.shouldShowRequestPermissionRationale(permission);
+    }
+
     private RecyclerView rvPostList;
     private PostAdapter adapter;
     private List<Post> postList;
